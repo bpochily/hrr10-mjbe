@@ -1,3 +1,4 @@
+
 {
   "name": "hrr10-mjbe",
   "version": "0.0.0",
@@ -41,7 +42,11 @@
     "paper-radio-group": "PolymerElements/paper-radio-group#~1.0.8",
     "paper-radio-button": "PolymerElements/paper-radio-button#~1.0.12",
     "paper-toast": "PolymerElements/paper-toast#~1.1.1",
-    "paper-checkbox": "PolymerElements/paper-checkbox#~1.1.0"
+    "paper-checkbox": "PolymerElements/paper-checkbox#~1.1.0",
+    "moment": "~2.10.6",
+    "google-chart": "GoogleWebComponents/google-chart#~1.0.4",
+    "paper-date-picker": "polymer-paper-datepicker#~1.1.2",
+    "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#~1.1.1"
   },
   "devDependencies": {
     "angular-mocks": "~1.4.0"

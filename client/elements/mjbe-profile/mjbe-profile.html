@@ -1,0 +1,331 @@
+<link rel="import" href="../../bower_components/iron-icons/social-icons.html">
+<dom-module id="mjbe-profile">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 15px;
+        background: #444;
+        min-height: 800px;
+      }
+      paper-material {
+        margin: 10px;
+        padding: 10px;
+      }
+      .box {
+        width: 500px;
+        min-width: 300px;
+      }
+      .short-box {
+        height: 100px;
+      }
+      .time-box {
+        height: 175px;
+      }
+      .tall-box {
+        height: 300px;
+      }
+      .bargraph-box {
+        height: 330px;
+      }
+      .square-box {
+        height: 175px;
+      }
+      .quote-box {
+        height: 125px;
+      }
+      .d3box {
+        height: 490px;
+      }
+      .namebox {
+        background: #333;
+        color: #fff;
+        height: 100px;
+      }
+      .heightfix {
+        overflow: auto;
+      }
+      .invitation {
+        background: #FFCC00;
+        text-align: center;
+      }
+      .timerholder {
+        margin: 0 auto;
+      }
+      .pointstext {
+        color: white;
+        margin: 0;
+        padding: 0;
+        font-size: 120px;
+        text-align: right;
+      }
+      paper-button {
+        background: white;
+        color: #007AFF;
+      }
+      .second {
+        min-width: 420px;
+      }
+      .lol {
+        min-width: 100%;
+      }
+    </style>
+    
+    <!-- top bar only for pending teacher invitation -->
+    <template is="dom-if" if="{{request}}">
+    <div class="tile layout horizontal">
+      <paper-material elevation="1" class="flex invitation heightfix">
+          <h2>You got a class invitation from {{request.teacher.name}}!</h2>
+          <p>{{request.class.name}}</p>
+          <paper-button raised on-tap="acceptRequest"><iron-icon icon="social:group-add"></iron-icon> Click here to join the class</paper-button>
+      </paper-material>
+    </div>
+    </template>
+
+    <!-- whole grid -->
+    <div class="bar horizontal layout around-justified wrap tile">
+
+      <!-- first column -->
+      <div class="box tile flex layout vertical">
+        
+        <!-- NAME box -->
+        <paper-material elevation="4" class="namebox">
+          <h2>{{name}}</h2>
+          <p>Member since {{joined}}</p>
+        </paper-material>
+        
+        <!-- POINTS box -->
+        <paper-material elevation="1" style="background-color: #5AC8FA" class="square-box">
+          <div class="horizontal layout start-justified self-start">
+            <h3>Total points</h3>
+          </div>
+          <div class="horizontal layout end-justified self-end">
+            <p class="pointstext">{{points}}</p>
+          </div>
+        </paper-material>
+
+        <!-- CALENDAR box -->
+        <paper-material elevation="1" style="background-color: #FF9500" class="tall-box">
+              <paper-calendar></paper-calendar>
+        </paper-material>
+
+      </div>
+
+      <!-- second column -->
+      <div class="tile flex layout vertical second">
+        
+        <!-- D3 box -->
+        <paper-material elevation="1" style="background-color: #4CD964" class="d3box">
+          <mjbe-profile-pie userselection="{{userselection}}" loadskills="{{loadskills}}"  loadstudentskills="{{loadstudentskills}}"></mjbe-profile-pie>
+        </paper-material>
+
+        <!-- QUOTE box -->
+        <paper-material elevation="1" style="background-color: #FFCC00" class="quote-box">
+          <h2><em>{{quote}}</em></h2>
+        </paper-material>
+
+      </div>
+
+      <!-- third column -->
+      <div class="box tile layout vertical flex">
+
+        <!-- BADGE box -->
+        <paper-material elevation="1" style="background-color: white" class="short-box" >
+          <h3>Latest Badge</h3>
+          <template is="dom-if" if="{{badge}}">
+          <paper-card animatedShadow="true" elevation="1" id="badgecard">
+              <paper-icon-button icon="{{badge.image}}" style="color: blue"></paper-icon-button>
+              <paper-tooltip position="top" offset="-5" delay="0">{{badge.name}}</paper-tooltip>
+              {{badge.name}}
+            </paper-card>
+            </template>
+            <template is="dom-if" if="{{noBadge(badge)}}">
+            <div>No badges yet!</div>
+            </template>
+        </paper-material>
+
+        <!-- TODAY'S TIME box -->
+        <paper-material elevation="1" style="background-color: #00ECB9" class="time-box">
+            <h3>Time worked today</h3>
+          <div class="timerholder flex horizontal layout center-justified">
+            <mjbe-timer minutes="{{minutes}}" seconds="{{seconds}}"></mjbe-timer>
+          </div>
+        </paper-material>
+
+        <!-- BAR GRAPH box -->
+        <paper-material elevation="1" style="background-color: #FF2D55" class="tall-box" id="graphbox">
+          <mjbe-updating-grid loadtimes="{{loadtimes}}" class="lol"></mjbe-updating-grid>
+        </paper-material>
+        
+      </div>
+    </div>
+<!--     <div class="bar horizontal layout around-justified wrap tile">
+      <div class="box tile layout flex">
+        <paper-material elevation="1">
+          <h3>Let's go</h3>
+        </paper-material>
+      </div>
+      <div class="box tile layout flex">
+        <paper-material elevation="1">
+          <h4>Almost Halvzies</h4>
+        </paper-material>
+      </div>
+    </div> -->
+
+    
+  </template>
+  <script>
+    var quotes = ['“Don’t let what you can’t do stop you from doing what you can do.” – John Wooden',
+                   'I think I can. I know I can.',
+                   '“When you know better you do better.” – Maya Angelou',
+                   '“Do what you can, with what you have, where you are.” - Theodore Roosevelt',
+                   '“You always pass failure on the way to success.” - Mickey Rooney',
+                   '“No one is perfect – that’s why pencils have erasers.”  – Wolfgang Riebe',
+                   '“The more that you read, the more things you will know. The more that you learn, the more places you’ll go.” -Dr. Suess',
+                   '“Anything is possible. Anything can be.” – Shel Silverstein',
+                   ]
+
+    Polymer({
+      is: 'mjbe-profile',
+
+      behaviors: [
+        Polymer.NeonSharedElementAnimatableBehavior,
+        Polymer.NeonAnimatableBehavior,
+        Polymer.NeonAnimationRunnerBehavior
+      ],
+
+      properties: {
+      //stringified version of raw class data
+        // loadclasses: {
+        //   type: String,
+        //   notify: true
+        // },
+        chartheight: {
+          computed: 'getHeight()',
+          notify: true
+        },
+        chartwidth: {
+          computed: 'getWidth()',
+          notify: true
+        },
+        loadrequest: {
+          notify: true
+        },
+
+        request: {
+          computed: 'parse(loadrequest)'
+        },
+
+        loadbadge: {
+          notify: true
+        },
+
+        badge: {
+          computed: 'parse(loadbadge)'
+        },
+
+        points: {
+          notify: true
+        },
+
+        accepted: {
+          notify: true
+        },
+
+        name: {
+          notify: true
+        },
+
+        joined: {
+          notify: true
+        },
+
+        userselection: {
+          notify: true,
+          observer: 'userselect'
+        },
+
+        loadskills: {
+          notify: true
+        },
+
+        loadstudentskills: {
+          notify: true
+        },
+
+        quote: String,
+
+        loadtimes: {
+          notify: true
+        },
+
+        times: {
+          computed: 'parse(loadtimes)',
+          observer: 'setClock'
+        },
+
+        animationConfig: {
+          type: Object,
+          value: function() {
+            return {
+              'entry': [{
+                name: 'cascaded-animation',
+                animation: 'transform-animation',
+                transformFrom: 'translateY(100%)',
+                transformTo: 'none',
+                timing: {
+                  delay: 50
+                }
+              }]
+              // 'toolbar': [{
+              //   name: 'slide-down-animation',
+              //   node: this.$.classSelect,
+              //   timing: {
+              //     delay: 50
+              //   }
+              // }]
+            }
+          }
+        }
+      },
+
+      userselect: function() {
+        console.log(this.userselection, 'this is the observer');
+      },
+    
+      attached: function() {
+        this.async(function() {
+          var nodeList = Polymer.dom(this.root).querySelectorAll('.tile');
+          this.animationConfig['entry'][0].nodes = Array.prototype.slice.call(nodeList);
+          // this.playAnimation('toolbar');
+          this.playAnimation('entry');
+        });
+        this.quote = quotes[Math.floor(Math.random() * quotes.length)];
+      },
+
+      parse: function(load) {
+        try {
+          console.log('loading');
+          console.log(load);
+          return JSON.parse(load);
+        } catch (e) {}
+      },
+
+      noBadge: function() {
+        console.log('nobadge');
+        console.log(!this.badge);
+        return !this.badge;
+      },
+
+      setClock: function() {
+        var time = Date.now();
+        this.seconds = this.times[time - time % (24 * 60 * 60 * 1000)] % 60 || 0;
+        this.minutes = Math.floor(this.times[time - time % (24 * 60 * 60 * 1000)] / 60) || 0;
+      },
+
+      acceptRequest: function() {
+        this.accepted = 'true';
+      }
+    });
+  </script>
+</dom-module>

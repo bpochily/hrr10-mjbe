@@ -1,0 +1,108 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<dom-module id="mjbe-teacher-pie">
+  <template>
+    <style>
+    :host {
+      display: block;
+    }
+
+    #holder {
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .dropdownmenu {
+      margin: 0 auto;
+      bottom: 20px;
+    }
+
+    </style>
+
+
+        <div id="holder"><h1>Class Progress</h1></div>
+
+        <figure id="chart-container"></figure>
+
+        <paper-dropdown-menu class="dropdownmenu" label="Classes">
+          <paper-menu class="dropdown-content">
+            <template is="dom-repeat" items="[[parsedSkills]]">
+            <paper-item>[[item.name]]</paper-item>
+            </template>
+          </paper-menu>
+        </paper-dropdown-menu>
+  </template>
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script>
+  'use strict';
+  Polymer({
+    is: 'mjbe-teacher-pie',
+    properties: {
+      hoverselection: {
+        type: String
+      },
+      hovercolor: {
+        type: String
+      },
+      hoverbackground: {
+        type: String
+      },
+      userselection: {
+        notify: true
+      },
+      parsedSkills: {
+        type: Array,
+        computed: 'parseSkills(skills)',
+      },
+      students: {
+        computed: 'parseStudents(loadstudents)',
+        // observer: 'drawPie'
+      },
+      loadstudents: {
+        notify: true
+      },
+      tree: {
+        computed: 'parseTree(loadtree)',
+      },
+      loadtree: {
+        notify: true
+      },
+      active: {
+        notify: true
+      }
+    },
+    attached: function() {
+      console.log('inside attached')
+      var container = document.querySelector('figure#chart-container');
+      var attrs = {
+          'id': 'col-chart',
+          'type': 'column',
+          'options':'{"title": "Class Progress"}',
+          'cols':'[{"label":"Subject", "type":"string"}, {"label":"Class completion", "type":"number"}]',
+          'rows':'[["Addition", 80],["Subtraction", 70],["Division", 90], ["Multiplication", 70]]'
+        };
+      var chart = document.createElement('google-chart');
+      for (var key in attrs) {
+        chart.setAttribute(key, attrs[key]);
+      }
+      container.appendChild(chart);
+    },
+
+    clickHandler: function(d) {
+      this.userselection = d.data._id;
+    },
+
+    parseStudents: function(loadstudents) {
+      try {
+        console.log(loadstudents, 'this is loadstudents');
+        return JSON.parse(loadstudents);
+      } catch (e) {}
+    },
+
+    parseSkills: function(skills) {
+      try {       
+        return JSON.parse(skills);
+      } catch (e) {}
+    }
+  });
+  </script>
+</dom-module>

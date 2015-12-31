@@ -62,6 +62,12 @@ angular.module('hrr10MjbeApp')
       });
     }
 
+    this.getName = function(cb) {
+      getUser(function(user) {
+        cb(user === null ? 'Guest' : user.name);
+      })
+    }
+
     this.getSkills = function(cb) {
       getUser(function(user) {
         console.log('skills');
@@ -70,7 +76,7 @@ angular.module('hrr10MjbeApp')
       })
     }
 
-    this.addOrUpdateSkill = function(skillId, status) {
+    this.addOrUpdateSkill = function(skillId, status, cb) {
       this.addPointsForSkill(skillId, function() {
         getUser(function(user) {
           if (!user) return;
@@ -80,7 +86,7 @@ angular.module('hrr10MjbeApp')
               if (user.studentData.skills[i].skill._id === skillId) {
                 console.log('has skill');
                 user.studentData.skills[i].status = status;
-                return save();
+                return save(cb);
               }
             }
             console.log('pushing skill');
@@ -88,7 +94,7 @@ angular.module('hrr10MjbeApp')
               skill: skill,
               status: status
             });
-            save();
+            save(cb);
           })
         })
       })
@@ -206,6 +212,13 @@ angular.module('hrr10MjbeApp')
       })
     }
 
+    this.getTimes = function(cb) {
+      getUser(function(user) {
+        if (!user) return cb([]);
+        cb(user.studentData.times);
+      })
+    }
+
     this.updateTime = function(time) {
       getUser(function(user) {
         if (!user) return;
@@ -213,5 +226,15 @@ angular.module('hrr10MjbeApp')
         user.studentData.times[now - now % (24 * 60 * 60 * 1000)] = time;
         if (time % 10 === 0) save();
       })
+    }
+
+    this.getJoined = function(cb) {
+      getUser(function(user) {
+        cb(user.joined);
+      })
+    }
+
+    this.clear = function() {
+      user = null;
     }
   });
